@@ -359,7 +359,7 @@ class DuplicateMerger(object):
         return new_candidates
 
 
-def merge_detections(image_name, results):
+def merge_detections(image_name, results, pixel_data = None):
 #    project = 'SKU_dataset'
     result_df = pandas.DataFrame()
     result_df['x1'] = results[:, 0].astype(int)
@@ -375,7 +375,7 @@ def merge_detections(image_name, results):
 
     result_df.reset_index()
     result_df['id'] = result_df.index
-    pixel_data = None
+    
     duplicate_merger = DuplicateMerger()
     duplicate_merger.multiprocess = False
     duplicate_merger.compression_factor = 1

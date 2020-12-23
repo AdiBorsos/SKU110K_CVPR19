@@ -79,7 +79,7 @@ def _read_images(base_dir):
                 exists = os.path.isfile(img_file)
                 
                 if not exists:
-                    print("Warning: Image file {} is not existing".format(img_file))
+                    # print("Warning: Image file {} is not existing".format(img_file))
                     continue
 
                 # Image shape
@@ -129,7 +129,7 @@ def _read_annotations(csv_reader, classes, base_dir, image_existence):
             img_file = os.path.join(base_dir, img_file)
             # Check images exists
             if img_file not in image_existence:
-                print("Warning: Image file {} is not existing".format(img_file))
+                # print("Warning: Image file {} is not existing".format(img_file))
                 continue
 
         except ValueError:

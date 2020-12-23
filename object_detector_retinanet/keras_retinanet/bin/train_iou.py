@@ -381,7 +381,7 @@ def main(args=None):
     keras.backend.tensorflow_backend.set_session(get_session())
 
     # Weights and logs saves in a new locations
-    stmp = time.strftime("%c").replace(" ", "_")
+    stmp = time.strftime("%c").replace(" ", "_").replace(":", "_")
     args.snapshot_path = os.path.join(args.snapshot_path, stmp)
     args.tensorboard_dir = os.path.join(args.tensorboard_dir, stmp)
     print("Weights will be saved in  {}".format(args.snapshot_path))

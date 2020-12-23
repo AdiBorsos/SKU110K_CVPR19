@@ -76,6 +76,8 @@ def model_with_weights(model, weights, skip_mismatch):
         weights       : The weights to load.
         skip_mismatch : If True, skips layers whose shape of weights doesn't match with the model.
     """
+
+    print(weights)
     if weights is not None:
         model.load_weights(weights, by_name=True, skip_mismatch=skip_mismatch)
     return model
@@ -395,7 +397,7 @@ def main(args=None):
     # create the model
     if args.snapshot is not None:
         print('Loading model, this may take a second...')
-        model = models.load_model(args.snapshot, backbone_name=args.backbone)
+        model = models.load_model(args.snapshot, backbone_name=args.backbone, compile=False)
         training_model = model
         prediction_model = retinanet_bbox(model=model)
     else:

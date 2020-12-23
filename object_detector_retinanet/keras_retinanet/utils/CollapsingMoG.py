@@ -15,11 +15,14 @@ class Timeout():
         self.sec = sec
 
     def __enter__(self):
-        signal.signal(signal.SIGALRM, self.raise_timeout)
-        signal.setitimer(signal.ITIMER_REAL, self.sec)
+        if hasattr(signal, "SIGALRM"):
+            signal.signal(signal.SIGALRM, self.raise_timeout)
+        if hasattr(signal, "ITIMER_REAL"):
+            signal.setitimer(signal.ITIMER_REAL, self.sec)
 
     def __exit__(self, *args):
-        signal.alarm(0)  # disable alarm
+        if hasattr(signal, "alarm"):
+            signal.alarm(0)  # disable alarm
 
     def raise_timeout(self, *args):
         raise Timeout.Timeout()
