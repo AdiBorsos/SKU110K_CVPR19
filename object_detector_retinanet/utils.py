@@ -24,6 +24,7 @@ def create_folder(path):
     if folder_missing:
         # Using makedirs since the path hierarchy might not fully exist.
         try:
+            print(path)
             os.makedirs(path)
         except OSError as e:
             if (e.errno, e.strerror) == FILE_EXISTS_ERROR:
@@ -40,7 +41,7 @@ def root_dir():
     if platform.system() == 'Linux':
         return os.path.join(os.getenv('HOME'), 'Documents', 'SKU110K')
     elif platform.system() == 'Windows':
-        return os.path.abspath('C:/Users/{}/Documents/SKU110K/'.format(os.getenv('username')))
+        return os.path.abspath('E:\Code\_CV\SKU110K_CodeGit')
 
 
 def image_path():

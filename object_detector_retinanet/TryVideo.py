@@ -16,48 +16,59 @@ import os
 import numpy as np
 import time
 import datetime
-
+import keras
+import tensorflow as tf
 import csv
 # set tf backend to allow memory to grow, instead of claiming everything
 
-from keras import backend as K
-import tensorflow as tf
 from PIL import Image
 from object_detector_retinanet.keras_retinanet.preprocessing.csv_generator import CSVGenerator
 
 hard_score_rate = 0.5
 # for filtering predictions based on score (objectness/confidence)
 threshold = 0.3
-score_threshold=0.05
+score_threshold=0.1
 max_detections=9999
 
-model_path = os.path.abspath('D:/Tech assesments/_CV/SKU110K_CodeGit/object_detector_retinanet/iou_resnet50_csv_06.h5')
+def get_session():
+
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "99"
+
+    """ Construct a modified tf session.
+    """
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    #config.log_device_placement = True
+
+    #config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
+
+    return tf.Session(config=config)
+
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
+keras.backend.tensorflow_backend.set_session(get_session())
+model_path = os.path.abspath('E:/Code/_CV/SKU110K_CodeGit/object_detector_retinanet/iou_resnet50_csv_06.h5')
 model = models.load_model(model_path, backbone_name='resnet50', convert=True)
-    
-def FrameCapture(path): 
-      
-    # Path to video file 
-    vidObj = cv2.VideoCapture(path) 
-  
-    # Used as counter variable 
-    count = 0
-    everyX = 10
-
-    # checks whether frames were extracted 
-    success = 1
-  
-    while success: 
-  
-        # vidObj object calls read 
-        # function extract frames 
-        success, image = vidObj.read() 
-
-        if (count % everyX == 0):
-            # Saves the frames with frame-count 
-            cv2.imwrite("D:/Tech assesments/_CV/SKU110K_CodeGit/images/frame%d.jpg" % count, image) 
-  
-        count += 1
-        print (count)
 
 def PredThisPath(model = None, videoPath = None):
     csv_data_lst = []
@@ -75,18 +86,28 @@ def PredThisPath(model = None, videoPath = None):
     width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))  # float 
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # float
     fps = cap.get(cv2.CAP_PROP_FPS)
+
+    maxNrOfFrames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter('D:/Tech assesments/_CV/output.mp4', fourcc, fps, (width, height))
+    out = cv2.VideoWriter('E:/Code/_CV/output.mp4', fourcc, fps, (width, height))
     
     image_name = 'frame{}'.format(0)
     
-    maxFrames = 100
-    predFramerate = 10
+    # -1 for full video - x frames for max number of frames in output
+    maxFrames = -1
+
+    # framerate to process - 10 = 1 in every 10 frames will be processed
+    predFramerate = 3
     frameNo = -1
     success = 1
+
+    printProgressBar(0, maxNrOfFrames, prefix = 'Progress:', suffix = 'Complete', length = 50)
     while(success):
         frameNo = frameNo + 1
+        printProgressBar(frameNo, maxNrOfFrames, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
+        print
         # read the frames
         success, frame = cap.read()
 
@@ -157,7 +178,7 @@ def PredThisPath(model = None, videoPath = None):
             box = np.asarray([detection['x1'], detection['y1'], detection['x2'], detection['y2']])
 
             cv2.rectangle(frame, (detection['x1'], detection['y1']), (detection['x2'], detection['y2']), (0, 0, 255), 2, cv2.LINE_AA)
-            cv2.putText(frame, str(detection['confidence']), (detection['x1'], detection['y1'] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
+            # cv2.putText(frame, str(detection['confidence']), (detection['x1'], detection['y1'] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
 
             filtered_boxes.append(box)
             filtered_scores.append(detection['confidence'])
@@ -166,7 +187,7 @@ def PredThisPath(model = None, videoPath = None):
                     detection['confidence'], detection['hard_score']]
             csv_data_lst.append(row)
         
-        cv2.imwrite(os.path.join("D:/Tech assesments/_CV/frames", '{}.png'.format(image_name)), frame)
+        cv2.imwrite(os.path.join("E:/Code/_CV/frames", '{}.png'.format(image_name)), frame)
         out.write(frame)
 
         
@@ -196,7 +217,7 @@ def PredThisPath(model = None, videoPath = None):
     print("Saved output.csv file")
 
 
-PredThisPath(model, "D:/Tech assesments/_CV/Trim1.mp4")
+PredThisPath(model, "E:/Code/_CV/Trim1.mp4")
 
 
 # FrameCapture("D:/Tech assesments/_CV/Trim1.mp4")
